@@ -23,7 +23,6 @@ drop table if exists temptable;
 -- limit 1000;
 -- select * from temptable;
 
-
  -- STATE CODE JOIN
 select * from state_code;
 

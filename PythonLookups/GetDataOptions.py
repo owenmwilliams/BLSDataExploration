@@ -1,5 +1,6 @@
 import psycopg2
 from datetime import datetime
+from psycopg2 import sql
 
 # timing start
 StartTime = datetime.now()
@@ -13,22 +14,30 @@ print("Database opened successfully: ", Time1)
 # setting up a cursor
 cur = con.cursor()
 
-# selecting distinct states
-cur.execute("SELECT state_name FROM fullmaster \
-GROUP BY state_name \
-ORDER BY state_name ASC")
-StatesArray = cur.fetchall()
-Time2 = datetime.now()-Time1-StartTime
-print(StatesArray)
-print("Array generated: ", Time2, Time2+Time1)
+# get all column names
+cur.execute("SELECT column_name FROM information_schema.columns \
+WHERE table_schema = 'public' \
+AND table_name   = 'fullmaster'")
+ColumnsArray = cur.fetchall()
+print("Array generated: ", datetime.now() - StartTime)
 
-# selecting distinct data types
-cur.execute("SELECT data_type_text FROM fullmaster \
-GROUP BY data_type_text \
-ORDER BY data_type_text ASC")
-DataArray = cur.fetchall()
-Time3 = datetime.now()-Time2-Time1-StartTime
-#print(DataArray)
-print("Array generated: ", Time3, Time3+Time2+Time1)
+# adjust columns array to determine the columns to pull unique values on
+NewColumnsArray = [x[0] for x in ColumnsArray]
+NewNewColumnsArray = [x for x in NewColumnsArray if not x.endswith('code',0,20)]
+
+# setup master list to pull all unique values
+MasterList = []
+
+# iterable list pull - to iterate through pulling unique filter values from database
+for i in range(len(NewNewColumnsArray)):
+    Column = NewNewColumnsArray[i]
+    query = sql.SQL("SELECT {0} FROM fullmaster GROUP BY {0} ORDER BY {0}")\
+        .format(sql.SQL(', ').join([sql.Identifier(Column)]))
+    cur.execute(query)
+    currentlist = cur.fetchall()
+    MasterList.append(Column)
+    MasterList.append(currentlist)
+    print(Column, "list generated:", datetime.now() - StartTime)
+print("MasterList generated: ", datetime.now() - StartTime)
 
 con.close()
