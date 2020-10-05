@@ -1,12 +1,13 @@
 import psycopg2
 
 # connecting to the right database
-con = psycopg2.connect(database='blsdata', user="postgres",
-            password="CCS1.01!ack", host="localhost", port="5432")
+con = psycopg2.connect(database='postgres', host="localhost", port="5433")
 print("Database opened successfully")
 
 # setting up a cursor
 cur = con.cursor()
+
+
 
 # selecting distinct data
 cur.execute("SELECT period, data_type_text, value FROM fullmaster \

@@ -1,54 +1,34 @@
-select * from masterdata_join;
-
-select * from testtable;
-drop table testtable;
-
-select count(*) from fullmaster;
-
+drop table if exists testtable;
 drop table if exists tempmastera;
 drop table if exists tempmasterb;
 drop table if exists temptable;
+drop table if exists state_code2;
+drop table if exists fullmaster;
 
- -- column type lookup
--- SELECT column_name, data_type, udt_name::regtype
--- FROM information_schema.columns 
--- WHERE table_schema = 'public'
---   AND table_name = 'masterdata_join';
 
- -- generate random test table
--- select *
--- into temptable
--- from masterdata_join
--- order by random()
--- limit 1000;
--- select * from temptable;
-
- -- STATE CODE JOIN
-select * from state_code;
+ -- [STATE CODE JOIN] --
 
  -- format lookup table to match masterdata (temptable)
-select LPAD(state_code::text, 2, '0'), state_name into state_code2 from state_code;
+select LPAD(sscc."﻿state_code"::text, 2, '0'), state_name into state_code2 from sm_state_code_csv sscc ;
 select * from state_code2;
 
  -- join new master table on lookup
 select *
 into tempmasterA
-from masterdata_join
+from public.masterdata_join mj
 inner join state_code2
-on (masterdata_join.statecode = state_code2.lpad)
-ORDER BY masterdata_join.series_id;
+on (mj.statecode = state_code2.lpad)
+ORDER BY mj.series_id;
 
  -- drop temporary tables and columns
 drop table state_code2;
 alter table tempmasterA drop column lpad;
-select * from tempmasterA;
 
 
- -- AREA CODE JOIN
-select * from area_code;
+ -- [AREA CODE JOIN] --
 
  -- format lookup table to match masterdata (temptable)
-select LPAD(area_code::text, 5, '0'), area_name into area_code2 from area_code;
+select LPAD(sacc."﻿area_code" ::text, 5, '0'), area_name into area_code2 from sm_area_code_csv sacc ;
 select * from area_code2;
 
  -- join new master table on lookup
@@ -63,14 +43,12 @@ ORDER BY tempmasterA.series_id;
 drop table area_code2;
 drop table tempmasterA;
 alter table tempmasterB drop column lpad;
-select * from tempmasterB;
 
 
- -- SECTOR CODE JOIN
-select * from sector_code;
+ -- [SECTOR CODE JOIN] --
 
  -- format lookup table to match masterdata (temptable)
-select LPAD(supersector_code::text, 2, '0'), supersector_name into sector_code2 from sector_code;
+select LPAD(ssccc."﻿supersector_code" ::text, 2, '0'), supersector_name into sector_code2 from public.sm_supersector_code_csv ssccc ;
 select * from sector_code2;
 
  -- join new master table on lookup
@@ -85,14 +63,12 @@ ORDER BY tempmasterB.series_id;
 drop table sector_code2;
 drop table tempmasterB;
 alter table tempmasterA drop column lpad;
-select * from tempmasterA;
 
 
- -- INDUSTRY CODE JOIN
-select * from industry_code;
+ -- [INDUSTRY CODE JOIN] --
 
  -- format lookup table to match masterdata (temptable)
-select LPAD(industry_code::text, 8, '0'), industry_name into industry_code2 from industry_code;
+select LPAD(sicc."﻿industry_code" ::text, 8, '0'), industry_name into industry_code2 from public.sm_industry_code_csv sicc;
 select * from industry_code2;
 
  -- join new master table on lookup
@@ -107,18 +83,17 @@ ORDER BY tempmasterA.series_id;
 drop table industry_code2;
 drop table tempmasterA;
 alter table tempmasterB drop column lpad;
-select * from tempmasterB;
 
- -- DATA CODE JOIN
-select * from data_code;
+
+ -- [DATA CODE JOIN] --
 
  -- format lookup table to match masterdata (temptable)
-select LPAD(data_type_code::text, 2, '0'), data_type_text into data_code2 from data_code;
+select LPAD(sdtcc."﻿data_type_code" ::text, 2, '0'), data_type_text into data_code2 from public.sm_data_type_code_csv sdtcc ;
 select * from data_code2;
 
  -- join new master table on lookup
 select *
-into fullmaster
+into public.fullmaster
 from tempmasterB
 inner join data_code2
 on (tempmasterB.datacode = data_code2.lpad)
@@ -127,5 +102,5 @@ ORDER BY tempmasterB.series_id;
  -- drop temporary tables and columns
 drop table data_code2;
 drop table tempmasterB;
-alter table fullmaster drop column lpad;
-select * from fullmaster;
+alter table public.fullmaster drop column lpad;
+select * from public.fullmaster;

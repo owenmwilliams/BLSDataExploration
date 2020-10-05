@@ -1,8 +1,7 @@
 import psycopg2
 
 # connecting to the right database
-con = psycopg2.connect(database='blsdata', user="postgres",
-            password="CCS1.01!ack", host="localhost", port="5432")
+con = psycopg2.connect(database='postgres', host="localhost", port="5433")
 print("Database opened successfully")
 
 # setting up a cursor
@@ -70,8 +69,8 @@ for row in rows:
 print("Data updated successfully")
 
 # deleting a single row
-cur.execute("DELETE FROM testtable WHERE series_id=1026;")
-con.commit
+cur.execute("DELETE FROM testtable WHERE series_id=1026")
+con.commit()
 print("Total deleted rows:", cur.rowcount, "\n")
 
 cur.execute("SELECT series_id, Month, Year, Value FROM testtable ORDER BY series_id ASC")
@@ -84,5 +83,8 @@ for row in rows:
     print("Value =", row[3], "\n")
 
 print("Data deleted successfully", "\n")
+
+cur.execute("SELECT * FROM testtable ORDER BY series_id ASC")
+print(cur.fetchall())
 
 con.close()

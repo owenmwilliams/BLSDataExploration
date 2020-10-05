@@ -6,8 +6,7 @@ from psycopg2 import sql
 StartTime = datetime.now()
 
 # connecting to the right database
-con = psycopg2.connect(database='blsdata', user="postgres",
-            password="CCS1.01!ack", host="localhost", port="5432")
+con = psycopg2.connect(database='postgres', host="localhost", port="5433")
 Time1 = datetime.now()-StartTime
 print("Database opened successfully: ", Time1)
 
@@ -16,8 +15,9 @@ cur = con.cursor()
 
 # get all column names
 cur.execute("SELECT column_name FROM information_schema.columns \
-WHERE table_schema = 'public' \
-AND table_name   = 'fullmaster'")
+            WHERE table_schema = 'public' \
+            AND table_name   = 'fullmaster' \
+            ;")
 ColumnsArray = cur.fetchall()
 print("Array generated: ", datetime.now() - StartTime)
 
@@ -39,5 +39,7 @@ for i in range(len(NewNewColumnsArray)):
     MasterList.append(currentlist)
     print(Column, "list generated:", datetime.now() - StartTime)
 print("MasterList generated: ", datetime.now() - StartTime)
+
+print("\n", len(MasterList), " fields in MasterList", "\n", NewNewColumnsArray)
 
 con.close()
